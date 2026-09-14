@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -63,32 +63,32 @@ h1{margin:0;font-size:clamp(24px,6vw,36px)}
 
 <main class="grid">
   <button class="app red" aria-label="Google Meet" onclick="go('https://meet.google.com/')">📞</button>
-  <button class="app orange" aria-label="Wikipedia" onclick="go('https://en.wikipedia.org/')">🔎</button>
-  <button class="app yellow" aria-label="Weather" onclick="go('https://www.google.com/search?q=weather')">🌤️</button>
+  <button class="app orange" aria-label="Wikipedia" onclick="go('https://www.wikipedia.org/')">🔎</button>
+  <button class="app yellow" aria-label="El tiempo" onclick="go('https://www.google.com/search?q=el+tiempo')">🌤️</button>
   <button class="app green" aria-label="Google Translate" onclick="go('https://translate.google.com/')">💬</button>
-  <button class="app blue" aria-label="Games" onclick="go('https://wordwall.net/community')">🎮</button>
-  <button class="app purple" aria-label="Calendar" onclick="showCalendar()">🗓️</button>
-  <button class="app pink" aria-label="Clock" onclick="showClock()">🕔</button>
-  <button class="app white" aria-label="Globe" onclick="showGlobe()">🌎</button>
+  <button class="app blue" aria-label="Juegos" onclick="go('https://wordwall.net/community')">🎮</button>
+  <button class="app purple" aria-label="Calendario" onclick="showCalendar()">🗓️</button>
+  <button class="app pink" aria-label="Reloj" onclick="showClock()">🕔</button>
+  <button class="app white" aria-label="Globo terráqueo" onclick="showGlobe()">🌎</button>
 </main>
 
 
-<section id="calendarScreen" class="overlay" role="dialog" aria-modal="true" aria-label="Calendar">
+<section id="calendarScreen" class="overlay" role="dialog" aria-modal="true" aria-label="Calendario">
   <div class="panel">
     <div class="top">
       <h1 id="monthTitle"></h1>
-      <button class="close" aria-label="Close" onclick="hideCalendar()">×</button>
+      <button class="close" aria-label="Cerrar" onclick="hideCalendar()">×</button>
     </div>
     <div id="calendarGrid"></div>
     <p id="calendarToday" style="text-align:center;font-weight:800;font-size:18px"></p>
   </div>
 </section>
 
-<section id="clockScreen" class="overlay" role="dialog" aria-modal="true" aria-label="Clock">
+<section id="clockScreen" class="overlay" role="dialog" aria-modal="true" aria-label="Reloj">
   <div class="panel" style="text-align:center">
     <div class="top">
-      <h1>🕔 Clock</h1>
-      <button class="close" aria-label="Close" onclick="hideClock()">×</button>
+      <h1>🕔 Reloj</h1>
+      <button class="close" aria-label="Cerrar" onclick="hideClock()">×</button>
     </div>
     <div style="display:grid;place-items:center">
       <canvas id="clockCanvas" width="360" height="360" style="max-width:100%;height:auto"></canvas>
@@ -97,18 +97,18 @@ h1{margin:0;font-size:clamp(24px,6vw,36px)}
   </div>
 </section>
 
-<section id="globeScreen" class="overlay" role="dialog" aria-modal="true" aria-label="Globe">
+<section id="globeScreen" class="overlay" role="dialog" aria-modal="true" aria-label="Globo terráqueo">
   <div class="panel">
     <div class="top">
-      <h1>🌎 Globe</h1>
-      <button class="close" aria-label="Close" onclick="hideGlobe()">×</button>
+      <h1>🌎 Globo terráqueo</h1>
+      <button class="close" aria-label="Cerrar" onclick="hideGlobe()">×</button>
     </div>
 
     <div class="globe-area">
-      <div id="realGlobe" aria-label="Interactive physical and political globe"></div>
+      <div id="realGlobe" aria-label="Globo terráqueo físico-político interactivo"></div>
     </div>
-    <p class="globe-caption">Interactive physical and political globe 🌍</p>
-    <p class="hint">Drag to rotate · pinch or use the wheel to zoom · countries are outlined.</p>
+    <p class="globe-caption">Globo físico-político interactivo 🌍</p>
+    <p class="hint">Arrastra para girar · pellizca o usa la rueda para acercar · los países aparecen delimitados.</p>
   </div>
 </section>
 
@@ -149,14 +149,14 @@ function showCalendar(){
   const year = now.getFullYear();
   const month = now.getMonth();
   const today = now.getDate();
-  const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-  document.getElementById("monthTitle").textContent = months[month] + " " + year;
+  const months = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+  document.getElementById("monthTitle").textContent = months[month] + " de " + year;
 
   const firstDay = (new Date(year, month, 1).getDay() + 6) % 7;
   const totalDays = new Date(year, month + 1, 0).getDate();
 
   let s = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:7px">';
-  ["M","T","W","T","F","S","S"].forEach(d => {
+  ["L","M","X","J","V","S","D"].forEach(d => {
     s += '<div style="text-align:center;font-weight:800;color:#666;padding:6px 0">' + d + '</div>';
   });
   for(let i=0;i<firstDay;i++) s += '<div></div>';
@@ -169,7 +169,7 @@ function showCalendar(){
   s += '</div>';
   document.getElementById("calendarGrid").innerHTML = s;
   document.getElementById("calendarToday").textContent =
-    "Today is " + months[month] + " " + today + ", " + year + " 📅";
+    "Hoy es " + today + " de " + months[month] + " de " + year + " 📅";
   document.getElementById("calendarScreen").classList.add("open");
 }
 function hideCalendar(){ document.getElementById("calendarScreen").classList.remove("open"); }
@@ -231,7 +231,7 @@ function drawClock(){
   ctx.restore();
 
   document.getElementById("clockText").textContent =
-    "Current time: " + now.toLocaleTimeString("en-US");
+    "Hora actual: " + now.toLocaleTimeString("es-ES");
 }
 function drawHand(ctx, angle, length, width){
   ctx.save();
