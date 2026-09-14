@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title></title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{
+  min-height:100vh;
+  background:linear-gradient(90deg,#ff0808,#ff5a00 14%,#ffe600 28%,#22df22 43%,#12d9d0 58%,#087cff 72%,#3320f5 86%,#ef00db);
+  overflow-x:hidden
+}
+body:before{
+  content:"";position:fixed;inset:-20%;pointer-events:none;
+  background:radial-gradient(ellipse at 12% 45%,rgba(255,255,255,.08),transparent 28%),
+             radial-gradient(ellipse at 48% 55%,rgba(255,255,255,.09),transparent 30%),
+             radial-gradient(ellipse at 84% 42%,rgba(255,255,255,.08),transparent 28%);
+  filter:blur(28px)
+}
+.grid{
+  position:relative;z-index:1;width:min(900px,100%);margin:auto;min-height:100vh;
+  padding:28px;display:grid;grid-template-columns:repeat(2,1fr);gap:20px;align-content:center
+}
+.app{
+  aspect-ratio:1;border:0;border-radius:30px;display:grid;place-items:center;
+  font-size:clamp(52px,10vw,88px);cursor:pointer;
+  box-shadow:0 10px 24px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.35);
+  transition:transform .12s
+}
+.app:active{transform:scale(.95)}
+.red{background:#ef3030}.orange{background:#ff811f}.yellow{background:#ffd51f}
+.green{background:#24c95b}.blue{background:#3287ed}.purple{background:#8b5bd8}
+.pink{background:#ff91c8}.white{background:#fff}
+.overlay{
+  position:fixed;inset:0;z-index:5;display:none;place-items:center;padding:18px;
+  background:rgba(15,10,30,.48);backdrop-filter:blur(8px)
+}
+.overlay.open{display:grid}
+.panel{
+  width:min(900px,100%);max-height:94vh;overflow:auto;background:#fff;border-radius:28px;
+  padding:20px;box-shadow:0 22px 60px rgba(0,0,0,.3)
+}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+h1{margin:0;font-size:clamp(24px,6vw,36px)}
+.close{
+  border:0;background:#eee;border-radius:50%;width:46px;height:46px;
+  font-size:25px;cursor:pointer
+}
+.globe-area{display:grid;place-items:center;padding:8px 0 4px}
+.globe{
+  width:min(650px,92vw);height:auto;filter:drop-shadow(0 18px 20px rgba(0,0,0,.25))
+}
+.globe.spin{animation:spinGlobe 18s linear infinite}
+@keyframes spinGlobe{from{transform:rotateY(0)}to{transform:rotateY(360deg)}}
+.globe-caption{text-align:center;font-weight:800;font-size:18px;margin:4px 0 0}
+.hint{text-align:center;color:#666;font-size:14px;margin:4px 0 0}
+@media(min-width:650px){.grid{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+
+<main class="grid">
+  <button class="app red" aria-label="Google Meet" onclick="go('https://meet.google.com/')">📞</button>
+  <button class="app orange" aria-label="Wikipedia" onclick="go('https://www.wikipedia.org/')">🔎</button>
+  <button class="app yellow" aria-label="El tiempo" onclick="go('https://www.google.com/search?q=el+tiempo')">🌤️</button>
+  <button class="app green" aria-label="Google Translate" onclick="go('https://translate.google.com/')">💬</button>
+  <button class="app blue" aria-label="Juegos" onclick="go('https://wordwall.net/community')">🎮</button>
+  <button class="app purple" aria-label="Calendario" onclick="showCalendar()">🗓️</button>
+  <button class="app pink" aria-label="Reloj" onclick="showClock()">🕔</button>
+  <button class="app white" aria-label="Globo terráqueo" onclick="showGlobe()">🌎</button>
+</main>
+
+
+<section id="calendarScreen" class="overlay" role="dialog" aria-modal="true" aria-label="Calendario">
+  <div class="panel">
+    <div class="top">
+      <h1 id="monthTitle"></h1>
+      <button class="close" aria-label="Cerrar" onclick="hideCalendar()">×</button>
+    </div>
+    <div id="calendarGrid"></div>
+    <p id="calendarToday" style="text-align:center;font-weight:800;font-size:18px"></p>
+  </div>
+</section>
+
+<section id="clockScreen" class="overlay" role="dialog" aria-modal="true" aria-label="Reloj">
+  <div class="panel" style="text-align:center">
+    <div class="top">
+      <h1>🕔 Reloj</h1>
+      <button class="close" aria-label="Cerrar" onclick="hideClock()">×</button>
+    </div>
+    <div style="display:grid;place-items:center">
+      <canvas id="clockCanvas" width="360" height="360" style="max-width:100%;height:auto"></canvas>
+      <p id="clockText" style="font-weight:800;font-size:18px"></p>
+    </div>
+  </div>
+</section>
+
+<section id="globeScreen" class="overlay" role="dialog" aria-modal="true" aria-label="Globo terráqueo">
+  <div class="panel">
+    <div class="top">
+      <h1>🌎 Globo terráqueo</h1>
+      <button class="close" aria-label="Cerrar" onclick="hideGlobe()">×</button>
+    </div>
+
+    <div class="globe-area">
+      <div id="realGlobe" aria-label="Globo terráqueo físico-político interactivo"></div>
+    </div>
+    <p class="globe-caption">Globo físico-político interactivo 🌍</p>
+    <p class="hint">Arrastra para girar · pellizca o usa la rueda para acercar · los países aparecen delimitados.</p>
+  </div>
+</section>
+
+<script src="https://unpkg.com/globe.gl"></script>
+<script src="https://unpkg.com/topojson-client@3"></script>
+<script>
+const globeContainer = document.getElementById('realGlobe');
+const globe = Globe()(globeContainer)
+  .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
+  .bumpImageUrl('https://unpkg.com/three-globe/example/img/earth-topology.png')
+  .backgroundImageUrl('https://unpkg.com/three-globe/example/img/night-sky.png')
+  .showAtmosphere(true)
+  .atmosphereColor('#66bfff')
+  .atmosphereAltitude(0.16)
+  .showGraticules(true)
+  .polygonsTransitionDuration(300)
+  .polygonCapColor(() => 'rgba(100,150,80,0.03)')
+  .polygonSideColor(() => 'rgba(70,70,70,0.12)')
+  .polygonStrokeColor(() => 'rgba(255,225,140,0.85)')
+  .polygonAltitude(0.006);
+
+fetch('https://unpkg.com/world-atlas@2/countries-110m.json')
+  .then(r => r.json())
+  .then(topo => {
+    const countries = topojson.feature(topo, topo.objects.countries).features;
+    globe.polygonsData(countries);
+  });
+
+globe.controls().autoRotate = true;
+globe.controls().autoRotateSpeed = 0.35;
+globe.controls().enableDamping = true;
+globe.pointOfView({lat:20,lng:0,altitude:2.15},1000);
+</script>
+
+<script>
+function showCalendar(){
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const today = now.getDate();
+  const months = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+  document.getElementById("monthTitle").textContent = months[month] + " de " + year;
+
+  const firstDay = (new Date(year, month, 1).getDay() + 6) % 7;
+  const totalDays = new Date(year, month + 1, 0).getDate();
+
+  let s = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:7px">';
+  ["L","M","X","J","V","S","D"].forEach(d => {
+    s += '<div style="text-align:center;font-weight:800;color:#666;padding:6px 0">' + d + '</div>';
+  });
+  for(let i=0;i<firstDay;i++) s += '<div></div>';
+  for(let d=1;d<=totalDays;d++){
+    const selected = d === today;
+    s += '<div style="aspect-ratio:1;border-radius:14px;display:grid;place-items:center;font-weight:700;'
+       + (selected ? 'background:#8b5bd8;color:white;box-shadow:0 4px 10px rgba(139,91,216,.35);' : '')
+       + '">' + d + '</div>';
+  }
+  s += '</div>';
+  document.getElementById("calendarGrid").innerHTML = s;
+  document.getElementById("calendarToday").textContent =
+    "Hoy es " + today + " de " + months[month] + " de " + year + " 📅";
+  document.getElementById("calendarScreen").classList.add("open");
+}
+function hideCalendar(){ document.getElementById("calendarScreen").classList.remove("open"); }
+
+let clockInterval = null;
+function showClock(){
+  document.getElementById("clockScreen").classList.add("open");
+  drawClock();
+  clearInterval(clockInterval);
+  clockInterval = setInterval(drawClock, 1000);
+}
+function hideClock(){
+  document.getElementById("clockScreen").classList.remove("open");
+  clearInterval(clockInterval);
+  clockInterval = null;
+}
+function drawClock(){
+  const canvas = document.getElementById("clockCanvas");
+  const ctx = canvas.getContext("2d");
+  const r = canvas.width / 2;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.save();
+  ctx.translate(r,r);
+
+  ctx.beginPath();
+  ctx.arc(0,0,r-12,0,Math.PI*2);
+  ctx.fillStyle = "#fff";
+  ctx.fill();
+  ctx.lineWidth = 8;
+  ctx.strokeStyle = "#222";
+  ctx.stroke();
+
+  for(let i=0;i<12;i++){
+    ctx.save();
+    ctx.rotate(i*Math.PI/6);
+    ctx.beginPath();
+    ctx.moveTo(0,-r+25);
+    ctx.lineTo(0,-r+44);
+    ctx.lineWidth = 7;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "#222";
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  const now = new Date();
+  const sec = now.getSeconds();
+  const min = now.getMinutes();
+  const hr = now.getHours() % 12;
+
+  drawHand(ctx, (hr + min/60) * Math.PI/6, r*.48, 11);
+  drawHand(ctx, (min + sec/60) * Math.PI/30, r*.67, 7);
+  drawHand(ctx, sec * Math.PI/30, r*.74, 3);
+
+  ctx.beginPath();
+  ctx.arc(0,0,9,0,Math.PI*2);
+  ctx.fillStyle = "#222";
+  ctx.fill();
+  ctx.restore();
+
+  document.getElementById("clockText").textContent =
+    "Hora actual: " + now.toLocaleTimeString("es-ES");
+}
+function drawHand(ctx, angle, length, width){
+  ctx.save();
+  ctx.rotate(angle);
+  ctx.beginPath();
+  ctx.moveTo(0,0);
+  ctx.lineTo(0,-length);
+  ctx.lineWidth = width;
+  ctx.lineCap = "round";
+  ctx.strokeStyle = "#222";
+  ctx.stroke();
+  ctx.restore();
+}
+</script>
+<script>
+function go(url){location.href=url}
+function showGlobe(){document.getElementById('globeScreen').classList.add('open')}
+function hideGlobe(){document.getElementById('globeScreen').classList.remove('open')}
+document.getElementById('globeScreen').addEventListener('click',e=>{
+  if(e.target.id==='globeScreen') hideGlobe()
+})
+document.getElementById('calendarScreen').addEventListener('click',e=>{
+  if(e.target.id==='calendarScreen') hideCalendar()
+})
+document.getElementById('clockScreen').addEventListener('click',e=>{
+  if(e.target.id==='clockScreen') hideClock()
+})
+</script>
+</body>
+</html>
